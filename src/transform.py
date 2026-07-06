@@ -1,24 +1,29 @@
 import pandas as pd
 import json
 from pathlib import Path
+from datetime import datetime
 
 BASE_DIR = Path(__file__).parent.parent
 GET_FROM = BASE_DIR / "data" / "raw"
 
-def get_latest_file():
+def get_data() -> dict:
+    with open(get_latest_file(), 'r', encoding= 'utf-8') as file:
+        return json.load(file)
+
+def get_latest_file() -> Path:
     files = list(GET_FROM.glob("extract_data_*.json")) # Itera sobre todos os arquivos da pasta raw
     if not files:
-         raise FileNotFoundError("Nenhum arquivo encontrado no diretório data/raw")
+         raise FileNotFoundError("No files found in the data/raw directory.")
     return max(files, key=lambda x: x.stat().st_mtime) # Retorna o maximo em relação ao modification time nos metadados do arquivo
 
 
 def local_data_normalize(data: dict) -> pd.Series:
-    return pd.Series({"Local": data["name"]}, name= "local")
+    return pd.Series({"local": data["name"]}, name= "local")
 
 
 def weather_data_normalize(data: dict) -> pd.Series:
     weather_data = pd.Series(data["weather"][0], name= "weather_data")
-    weather_data = weather_data.drop(["id", "icon"])
+    weather_data = weather_data.drop(["id", "icon"], errors= "ignore")
     weather_data = weather_data.rename({"main": "condition"})
     return weather_data
 
@@ -52,17 +57,22 @@ def normalize_all(data: dict) -> list[pd.Series]:
     ]
 
 
-def concat_all_data(data_normalized: pd.Series) -> pd.DataFrame:
-    all_data = pd.concat(data_normalized)
-    return pd.Series(all_data)
+def concat_all_data(data_normalized: list[pd.Series]) -> pd.Series:
+    return pd.concat(data_normalized)
+    
 
-
-def get_data():
-    with open(get_latest_file(), 'r', encoding= 'utf-8') as file:
-        return json.load(file)
+def export_processed(all_data: pd.Series) -> None:
+    EXPORT_TO = Path(__file__).parent.parent / "data" / "processed"
+    EXPORT_TO.mkdir(parents=True, exist_ok=True)
+    CREATED_FILE = EXPORT_TO / f"processed_data_{datetime.now().strftime('%Y%m%d_%H%M')}.json"
+    json_data = all_data.to_dict()
+    with open(CREATED_FILE, 'w', encoding='utf-8') as file:
+        json.dump(json_data, file, indent= 4)
 
 
 if __name__ == '__main__':
-    data = get_data()
-    data_normalized = normalize_all(data)
-    print(concat_all_data(data_normalized))
+    raw_data = get_data()
+    data_normalized = normalize_all(raw_data)
+    processed = concat_all_data(data_normalized)
+    print(processed)
+    export_processed(processed)
