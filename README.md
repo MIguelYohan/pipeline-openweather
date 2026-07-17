@@ -84,6 +84,13 @@ Cada etapa é logada em `logs/pipeline-etl.log` e no console, com timestamp.
    python main.py
 ```
 
+3. Você pode editar as informações de latitude e longitude manualmente em main.py para mudar o local de extração dos dados
+```main.py
+   # Latitude e longitude de Brasília - DF
+   lat = -15.7942 
+   lon = -47.8822
+```
+
 ## Documentação
 
 - [Visão geral da pipeline](docs/overview.png)
