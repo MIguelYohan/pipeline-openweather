@@ -86,4 +86,4 @@ Cada etapa é logada em `logs/pipeline-etl.log` e no console, com timestamp.
 
 ## Documentação
 
-- [Visão geral da pipeline](docs/overview.excalidraw)
+- [Visão geral da pipeline](docs/overview.png)
