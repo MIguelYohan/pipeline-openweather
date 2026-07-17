@@ -1,37 +1,36 @@
 import pandas as pd
-from db import Session, Base, engine
-from models import Climate
-from transform import get_data, normalize_all, concat_all_data, export_processed
-# Guardar os dados no banco 
+from src.db import Session, Base, engine
+from src.models import Climate
+import logging
 
+# Logger do módulo
+logger = logging.getLogger(__name__)
+
+# Guardar os dados no banco 
 def create_tables(engine) -> None:
-    Base.metadata.create_all(bind= engine)
+    try:
+        logger.info("Creating tables")
+        Base.metadata.create_all(bind= engine)
+        logger.info("Tables created with sucess")
+    except Exception as e:
+        logger.exception(f"Tables create error: {e}")
+        return
 
 
 def insert_data(data_normalized: pd.Series) -> None:
     with Session() as session:
         try:
+            logger.info("Inserting data in database")
             c = Climate(**data_normalized.to_dict())
             session.add(c)
             session.commit()
+            logger.info("Data inserted in database with sucess")
         except Exception as e:
             session.rollback()
-            print("Error inserting data into the database")
-            raise
+            logger.exception(f"Error inserting data into the database: {e}")
+            return
 
 
-if __name__ == '__main__':
-    r_data = get_data()
-    n_data = normalize_all(r_data)
-    data = concat_all_data(n_data)
-    try:
-        create_tables(engine)
-        print("Tabelas criadas/verificadas com sucesso.")
-    except Exception as e:
-        print(f"Erro ao criar as tabelas: {e}")
-
-    try:
-        insert_data(data)
-        export_processed(data)
-    except Exception as e:
-        print(f"Erro ao inserir os dados: {e}")
+def load(engine, data_normalized: pd.Series) -> None:
+    create_tables(engine)
+    insert_data(data_normalized)
