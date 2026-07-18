@@ -13,8 +13,8 @@ timestamp = datetime.now().strftime("%Y%m%d_%H%M") # Horario atual da geração 
 output_path = BASE_DIR / "data" / "raw" / f"extract_data_{timestamp}.json" # Caminho até a pasta raw
 
 # Latitude e longitude de Brasília - DF
-lat = -15.7942 
-lon = -47.8822
+lat = -15.7801
+lon = -47.9292
 
 load_dotenv()
 API_KEY = os.getenv("API_KEY")
