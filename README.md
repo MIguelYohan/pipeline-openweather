@@ -75,7 +75,7 @@ Cada etapa é logada em `logs/pipeline-etl.log` e no console, com timestamp.
 1. Suba o banco de dados (certifique-se de mudar as variáveis de ambiente antes):
 
 ```bash
-   docker-compose up
+   docker compose up
 ```
 
 2. Execute a pipeline por completo:
